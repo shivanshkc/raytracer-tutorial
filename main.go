@@ -32,23 +32,22 @@ var (
 		Sphere{
 			Center: NewVector(0, 0, -1),
 			Radius: 0.5,
-			Mat: Lambertian{
-				Attenuation: NewColor(0.7, 0.3, 0.3),
+			Mat: Dielectric{
+				RefractiveIndex: 2,
 			},
 		},
 		Sphere{
 			Center: NewVector(-1, 0, -1),
 			Radius: 0.5,
-			Mat: Metal{
-				Attenuation: NewColor(0.8, 0.8, 0.8),
-				Fuzz:        0.3,
+			Mat: Lambertian{
+				Attenuation: NewColor(0.1, 0.2, 0.3),
 			},
 		},
 		Sphere{
 			Center: NewVector(1, 0, -1),
 			Radius: 0.5,
 			Mat: Metal{
-				Attenuation: NewColor(0.8, 0.6, 0.2),
+				Attenuation: NewColor(0.6, 0.4, 0.2),
 				Fuzz:        0,
 			},
 		},
