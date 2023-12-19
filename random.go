@@ -25,11 +25,3 @@ func RandomVectorInUnitSphere() Vec3 {
 		}
 	}
 }
-
-func RandomVectorInHemisphere(normal Vec3) Vec3 {
-	inUnitSphere := RandomVectorInUnitSphere()
-	if inUnitSphere.Dot(normal) > 0 {
-		return inUnitSphere
-	}
-	return inUnitSphere.Multiply(-1)
-}

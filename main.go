@@ -67,9 +67,9 @@ func determineRayColor(ray Ray, object Hittable, depth int) Color {
 	}
 
 	if info, isHit := object.IsHit(ray, 0.001, math.MaxFloat64); isHit {
-		nextTarget := info.Point.Plus(RandomVectorInHemisphere(info.Normal))
-		colour := determineRayColor(NewRay(info.Point, nextTarget.Minus(info.Point)), object, depth-1)
-		return NewColor(colour.R*0.5, colour.G*0.5, colour.B*0.5)
+		newDirection := info.Normal.Plus(RandomVectorInUnitSphere())
+		color := determineRayColor(NewRay(info.Point, newDirection), object, depth-1)
+		return NewColor(color.R*0.5, color.G*0.5, color.B*0.5)
 	}
 
 	// Render the background.
