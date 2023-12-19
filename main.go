@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 )
 
@@ -53,9 +54,17 @@ func main() {
 
 // determineRayColor determines the color of the given ray.
 func determineRayColor(ray Ray) Color {
-	// If sphere is hit, render red.
-	if isSphereHit(NewVector(0, 0, -1), 0.5, ray) {
-		return NewColor(1, 0, 0)
+	sphereCenter := NewVector(0, 0, -1)
+	sphereRadius := 0.5
+
+	// If sphere is hit, render the colour as per the sphere's normal.
+	if distance, isHit := isSphereHit(sphereCenter, sphereRadius, ray); isHit {
+		normal := ray.PointAt(distance).Minus(sphereCenter)
+		return NewColor(
+			0.5*(normal.X+1),
+			0.5*(normal.Y+1),
+			0.5*(normal.Z+1),
+		)
 	}
 
 	// Render the background.
@@ -64,8 +73,9 @@ func determineRayColor(ray Ray) Color {
 	return NewColor(1, 1, 1).Lerp(NewColor(0.5, 0.7, 1.0), t)
 }
 
-// isSphereHit returns true if the given sphere is hit by the given ray.
-func isSphereHit(center Vec3, radius float64, ray Ray) bool {
+// isSphereHit checks if the given ray hits the given sphere.
+// The second return param indicates if the hit occurs, and the first return param tells the distance to the sphere.
+func isSphereHit(center Vec3, radius float64, ray Ray) (float64, bool) {
 	origin2Center := ray.Origin.Minus(center)
 
 	a := ray.Direction.Dot(ray.Direction)
@@ -73,5 +83,9 @@ func isSphereHit(center Vec3, radius float64, ray Ray) bool {
 	c := origin2Center.Dot(origin2Center) - radius*radius
 
 	discriminant := bHalf*bHalf - a*c
-	return discriminant >= 0
+	if discriminant < 0 {
+		return 0, false
+	}
+
+	return -bHalf - math.Sqrt(discriminant)/a, true
 }

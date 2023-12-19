@@ -43,7 +43,7 @@ func (v Vec3) Dot(vec Vec3) float64 {
 
 // Magnitude of this vector.
 func (v Vec3) Magnitude() float64 {
-	return math.Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
+	return math.Sqrt(v.Dot(v))
 }
 
 // Direction of this vector, also called a unit vector.
