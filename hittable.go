@@ -14,6 +14,9 @@ type HitInfo struct {
 	Normal Vec3
 	// Flag to tell whether the normal points inward or outward.
 	IsNormalOutward bool
+
+	// Material of the object that's hit.
+	Mat Material
 }
 
 // setNormalFacing sets the facing direction of the normal.
@@ -35,6 +38,7 @@ type Hittable interface {
 type Sphere struct {
 	Center Vec3
 	Radius float64
+	Mat    Material
 }
 
 func (s Sphere) IsHit(ray Ray, tMin, tMax float64) (HitInfo, bool) {
@@ -73,6 +77,7 @@ func (s Sphere) IsHit(ray Ray, tMin, tMax float64) (HitInfo, bool) {
 
 	hitInfo.Normal = hitInfo.Point.Minus(s.Center).Direction()
 	hitInfo.setNormalFacing(ray)
+	hitInfo.Mat = s.Mat
 
 	return hitInfo, true
 }

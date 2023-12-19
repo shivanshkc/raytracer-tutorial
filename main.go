@@ -10,7 +10,7 @@ import (
 
 const (
 	aspectRatio = 16.0 / 9.0
-	imageWidth  = 1024.0
+	imageWidth  = 800.0
 	imageHeight = imageWidth / aspectRatio
 
 	viewportHeight = 2.0
@@ -29,8 +29,36 @@ var (
 
 	// List of objects that will be rendered.
 	hittableGroup = NewHittableGroup([]Hittable{
-		Sphere{Center: NewVector(0, 0, -1), Radius: 0.5},
-		Sphere{Center: NewVector(0, -100.5, -1), Radius: 100},
+		Sphere{
+			Center: NewVector(0, 0, -1),
+			Radius: 0.5,
+			Mat: Lambertian{
+				Attenuation: NewColor(0.7, 0.3, 0.3),
+			},
+		},
+		Sphere{
+			Center: NewVector(-1, 0, -1),
+			Radius: 0.5,
+			Mat: Metal{
+				Attenuation: NewColor(0.8, 0.8, 0.8),
+				Fuzz:        0.3,
+			},
+		},
+		Sphere{
+			Center: NewVector(1, 0, -1),
+			Radius: 0.5,
+			Mat: Metal{
+				Attenuation: NewColor(0.8, 0.6, 0.2),
+				Fuzz:        0,
+			},
+		},
+		Sphere{
+			Center: NewVector(0, -100.5, -1),
+			Radius: 100,
+			Mat: Lambertian{
+				Attenuation: NewColor(0.8, 0.8, 0),
+			},
+		},
 	})
 )
 
@@ -85,9 +113,17 @@ func determineRayColor(ray Ray, object Hittable, depth int) Color {
 	}
 
 	if info, isHit := object.IsHit(ray, 0.001, math.MaxFloat64); isHit {
-		newDirection := info.Normal.Plus(RandomVectorInUnitSphere())
-		color := determineRayColor(NewRay(info.Point, newDirection), object, depth-1)
-		return NewColor(color.R*0.5, color.G*0.5, color.B*0.5)
+		scattered, attenuation, isScattered := info.Mat.Scatter(ray, info)
+		if !isScattered {
+			return NewColor(0, 0, 0)
+		}
+
+		scatteredRayCol := determineRayColor(scattered, object, depth-1)
+		return NewColor(
+			scatteredRayCol.R*attenuation.R,
+			scatteredRayCol.G*attenuation.G,
+			scatteredRayCol.B*attenuation.B,
+		)
 	}
 
 	// Render the background.

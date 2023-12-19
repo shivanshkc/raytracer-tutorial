@@ -50,3 +50,14 @@ func (v Vec3) Magnitude() float64 {
 func (v Vec3) Direction() Vec3 {
 	return v.Divide(v.Magnitude())
 }
+
+// Reflection returns the reflection of this vector about the given normal.
+func (v Vec3) Reflection(normal Vec3) Vec3 {
+	return v.Minus(normal.Multiply(v.Dot(normal)).Multiply(2))
+}
+
+// IsNearZero returns true if all components of the vector are near zero.
+func (v Vec3) IsNearZero() bool {
+	limit := 0.00001
+	return v.X < limit && v.Y < limit && v.Z < limit
+}
