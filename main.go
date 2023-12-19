@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
+	"time"
 )
 
 const (
@@ -16,6 +18,8 @@ const (
 	focalLength    = 1.0
 
 	maxDiffusionDepth = 10
+	// For anti-aliasing.
+	samplesPerPixel = 100
 )
 
 var (
@@ -40,20 +44,34 @@ func main() {
 	fmt.Printf("%d %d\n", int(imageWidth), int(imageHeight))
 	fmt.Printf("255\n")
 
+	// Create a random number generator.
+	var randSeed int64 = int64(time.Now().Nanosecond())
+	randomGen := rand.New(rand.NewSource(randSeed))
+
 	for j := imageHeight - 1; j >= 0; j-- {
 		// Progress tracker.
 		fmt.Fprintf(os.Stderr, "\rLines remaining: %d", int(j))
 
-		for i := 0; i < imageWidth; i++ {
-			x := float64(i) / (imageWidth - 1)
-			y := float64(j) / (imageHeight - 1)
+		for i := 0.0; i < imageWidth; i++ {
+			color := NewColor(0, 0, 0)
 
-			rayDirection := lowerLeftCorner.
-				Plus(horizontal.Multiply(x)).
-				Plus(vertical.Multiply(y))
+			for s := 0; s < samplesPerPixel; s++ {
+				x := (i + randomGen.Float64()) / (imageWidth - 1)
+				y := (j + randomGen.Float64()) / (imageHeight - 1)
 
-			ray := NewRay(origin, rayDirection)
-			fmt.Println(determineRayColor(ray, hittableGroup, maxDiffusionDepth).RGB())
+				rayDirection := lowerLeftCorner.
+					Plus(horizontal.Multiply(x)).
+					Plus(vertical.Multiply(y))
+
+				rayCol := determineRayColor(NewRay(origin, rayDirection), hittableGroup, maxDiffusionDepth)
+				color = NewColor(
+					color.R+rayCol.R,
+					color.G+rayCol.G,
+					color.B+rayCol.B,
+				)
+			}
+
+			fmt.Println(color.RGB(samplesPerPixel))
 		}
 	}
 

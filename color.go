@@ -22,8 +22,15 @@ func NewColorFromVec3(vec Vec3) Color {
 }
 
 // RGB converts the color into an "<r> <g> <b>" formatted string that can be used in a PPM file.
-func (c Color) RGB() string {
-	return fmt.Sprintf("%d %d %d", int(255.999*c.R), int(255.999*c.G), int(255.999*c.B))
+func (c Color) RGB(samplesPerPixel int) string {
+	scale := 1.0 / float64(samplesPerPixel)
+
+	return fmt.Sprintf(
+		"%d %d %d",
+		int(256*clamp(c.R*scale, 0, 0.9999)),
+		int(256*clamp(c.G*scale, 0, 0.9999)),
+		int(256*clamp(c.B*scale, 0, 0.9999)),
+	)
 }
 
 // Lerp stand for linear interpolation.
@@ -35,4 +42,14 @@ func (c Color) Lerp(end Color, factor float64) Color {
 		oneMinusFactor*c.G + factor*end.G,
 		oneMinusFactor*c.B + factor*end.B,
 	}
+}
+
+func clamp(value, min, max float64) float64 {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
 }
