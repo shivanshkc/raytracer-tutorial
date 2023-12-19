@@ -16,6 +16,11 @@ func NewColor(r, g, b float64) Color {
 	return Color{R: r, G: g, B: b}
 }
 
+// NewColorFromVec3 converts the given Vec3 into a Color.
+func NewColorFromVec3(vec Vec3) Color {
+	return Color{R: vec.X, G: vec.Y, B: vec.Z}
+}
+
 // RGB converts the color into an "<r> <g> <b>" formatted string that can be used in a PPM file.
 func (c Color) RGB() string {
 	return fmt.Sprintf("%d %d %d", int(255.999*c.R), int(255.999*c.G), int(255.999*c.B))
