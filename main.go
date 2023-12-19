@@ -53,7 +53,25 @@ func main() {
 
 // determineRayColor determines the color of the given ray.
 func determineRayColor(ray Ray) Color {
+	// If sphere is hit, render red.
+	if isSphereHit(NewVector(0, 0, -1), 0.5, ray) {
+		return NewColor(1, 0, 0)
+	}
+
+	// Render the background.
 	dir := ray.Direction.Direction()
 	t := 0.5 * (dir.Y + 1)
 	return NewColor(1, 1, 1).Lerp(NewColor(0.5, 0.7, 1.0), t)
+}
+
+// isSphereHit returns true if the given sphere is hit by the given ray.
+func isSphereHit(center Vec3, radius float64, ray Ray) bool {
+	origin2Center := ray.Origin.Minus(center)
+
+	a := ray.Direction.Dot(ray.Direction)
+	bHalf := origin2Center.Dot(ray.Direction)
+	c := origin2Center.Dot(origin2Center) - radius*radius
+
+	discriminant := bHalf*bHalf - a*c
+	return discriminant >= 0
 }
