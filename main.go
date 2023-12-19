@@ -14,6 +14,8 @@ const (
 	viewportHeight = 2.0
 	viewportWidth  = aspectRatio * viewportHeight
 	focalLength    = 1.0
+
+	maxDiffusionDepth = 10
 )
 
 var (
@@ -51,7 +53,7 @@ func main() {
 				Plus(vertical.Multiply(y))
 
 			ray := NewRay(origin, rayDirection)
-			fmt.Println(determineRayColor(ray, hittableGroup).RGB())
+			fmt.Println(determineRayColor(ray, hittableGroup, maxDiffusionDepth).RGB())
 		}
 	}
 
@@ -59,10 +61,15 @@ func main() {
 }
 
 // determineRayColor determines the color of the given ray.
-func determineRayColor(ray Ray, object Hittable) Color {
-	if info, isHit := object.IsHit(ray, 0, math.MaxFloat64); isHit {
-		colourVec := info.Normal.Plus(NewVector(1, 1, 1)).Divide(2)
-		return NewColorFromVec3(colourVec)
+func determineRayColor(ray Ray, object Hittable, depth int) Color {
+	if depth < 1 {
+		return NewColor(0, 0, 0)
+	}
+
+	if info, isHit := object.IsHit(ray, 0.001, math.MaxFloat64); isHit {
+		nextTarget := info.Point.Plus(RandomVectorInHemisphere(info.Normal))
+		colour := determineRayColor(NewRay(info.Point, nextTarget.Minus(info.Point)), object, depth-1)
+		return NewColor(colour.R*0.5, colour.G*0.5, colour.B*0.5)
 	}
 
 	// Render the background.
