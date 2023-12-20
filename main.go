@@ -13,63 +13,60 @@ const (
 	imageWidth  = 800.0
 	imageHeight = imageWidth / aspectRatio
 
-	viewportHeight = 2.0
-	viewportWidth  = aspectRatio * viewportHeight
-	focalLength    = 1.0
-
 	maxDiffusionDepth = 10
-	// For anti-aliasing.
-	samplesPerPixel = 100
+	samplesPerPixel   = 50
 )
 
-var (
-	origin     = NewVector(0, 0, 0)
-	horizontal = NewVector(viewportWidth, 0, 0)
-	vertical   = NewVector(0, viewportHeight, 0)
+// cameraOptions holds all the camera configs.
+var cameraOptions = CameraOptions{
+	LookFrom:            NewVector(13, 2, 3),
+	LookAt:              NewVector(0, 0, 0),
+	Up:                  NewVector(0, 1, 0),
+	AspectRatio:         aspectRatio,
+	FieldOfViewVertical: 20,
+	Aperture:            0.1,
+	FocusDistance:       10,
+}
 
-	// List of objects that will be rendered.
-	hittableGroup = NewHittableGroup([]Hittable{
-		Sphere{
-			Center: NewVector(0, 0, -1),
-			Radius: 0.5,
-			Mat: Dielectric{
-				RefractiveIndex: 2,
-			},
+// List of objects that will be rendered.
+var hittableGroup = NewHittableGroup([]Hittable{
+	Sphere{
+		Center: NewVector(0, 1, 0),
+		Radius: 1.0,
+		Mat: Dielectric{
+			RefractiveIndex: 1.5,
 		},
-		Sphere{
-			Center: NewVector(-1, 0, -1),
-			Radius: 0.5,
-			Mat: Lambertian{
-				Attenuation: NewColor(0.1, 0.2, 0.3),
-			},
+	},
+	Sphere{
+		Center: NewVector(-4, 1, 0),
+		Radius: 1,
+		Mat: Lambertian{
+			Attenuation: NewColor(0.4, 0.2, 0.1),
 		},
-		Sphere{
-			Center: NewVector(1, 0, -1),
-			Radius: 0.5,
-			Mat: Metal{
-				Attenuation: NewColor(0.6, 0.4, 0.2),
-				Fuzz:        0,
-			},
+	},
+	Sphere{
+		Center: NewVector(4, 1, 0),
+		Radius: 1,
+		Mat: Metal{
+			Attenuation: NewColor(0.7, 0.6, 0.5),
+			Fuzz:        0,
 		},
-		Sphere{
-			Center: NewVector(0, -100.5, -1),
-			Radius: 100,
-			Mat: Lambertian{
-				Attenuation: NewColor(0.8, 0.8, 0),
-			},
+	},
+	Sphere{
+		Center: NewVector(0, -1000, -1),
+		Radius: 1000,
+		Mat: Lambertian{
+			Attenuation: NewColor(0.5, 0.5, 0.5),
 		},
-	})
-)
+	},
+})
 
 func main() {
-	lowerLeftCorner := origin.
-		Minus(horizontal.Divide(2)).
-		Minus(vertical.Divide(2)).
-		Minus(NewVector(0, 0, focalLength))
-
 	fmt.Printf("P3\n")
 	fmt.Printf("%d %d\n", int(imageWidth), int(imageHeight))
 	fmt.Printf("255\n")
+
+	camera := NewCamera(cameraOptions)
 
 	// Create a random number generator.
 	var randSeed int64 = int64(time.Now().Nanosecond())
@@ -86,11 +83,9 @@ func main() {
 				x := (i + randomGen.Float64()) / (imageWidth - 1)
 				y := (j + randomGen.Float64()) / (imageHeight - 1)
 
-				rayDirection := lowerLeftCorner.
-					Plus(horizontal.Multiply(x)).
-					Plus(vertical.Multiply(y))
+				ray := camera.CastRay(x, y)
 
-				rayCol := determineRayColor(NewRay(origin, rayDirection), hittableGroup, maxDiffusionDepth)
+				rayCol := determineRayColor(ray, hittableGroup, maxDiffusionDepth)
 				color = NewColor(
 					color.R+rayCol.R,
 					color.G+rayCol.G,

@@ -41,6 +41,16 @@ func (v Vec3) Dot(vec Vec3) float64 {
 	return v.X*vec.X + v.Y*vec.Y + v.Z*vec.Z
 }
 
+// Cross calculates the cross product of this vector with the given vector
+// and returns the result.
+func (v Vec3) Cross(arg Vec3) Vec3 {
+	return NewVector(
+		v.Y*arg.Z-v.Z*arg.Y,
+		v.Z*arg.X-v.X*arg.Z,
+		v.X*arg.Y-v.Y*arg.X,
+	)
+}
+
 // Magnitude of this vector.
 func (v Vec3) Magnitude() float64 {
 	return math.Sqrt(v.Dot(v))
